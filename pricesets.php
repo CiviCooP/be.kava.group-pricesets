@@ -201,7 +201,6 @@ function pricesets_civicrm_buildAmount($pageType, &$form, &$amount) {
 		foreach($_priceSetSettings['options'] as $_priceSetIndex => &$_priceSet) {
 				$_priceSet['is_default'] = ($_priceSet['amount'] == $_cheapestOption) ? 1 : 0;
 		}
-		echo '</pre>';
 	}
 }
 
