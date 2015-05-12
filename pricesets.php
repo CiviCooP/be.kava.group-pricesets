@@ -115,10 +115,16 @@ function pricesets_civicrm_postProcess($formName, &$form) {
 	}
 	// If it's an existing option we're updating
 	if ($formName == "CRM_Price_Form_Option") {
+
 		// Delete all existing connections
 		pricesets_delete_pricefieldvalue_connections($_POST['optionId']);
+
 		// Connect all selected groups with the current price field value
 		foreach($_POST['option_group_restriction'] as $_group) {
+
+			if($_group == 0) {
+				continue; // Fix constraint error -KL
+			}
 			pricesets_connect_group_pricefieldvalue($_group, $_POST['optionId']);
 		}
 	}
