@@ -148,19 +148,21 @@ function pricesets_delete_pricefieldvalue_connections($priceFieldValueIdentifier
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_buildAmount
  */
 function pricesets_civicrm_buildAmount($pageType, &$form, &$amount) {
-	// Define admin variable
-	$_isAdmin 			= false;
+
+	// Define admin variable (was hardcoded as group 1, now checking for administer CiviCRM -KL)
+	$_isAdmin 			= CRM_Core_Permission::check('administer CiviCRM');
 	// Get global session
 	$_session			= &CRM_Core_Session::singleton();
 	// Fetch user identifier
 	$_userIdentifier	= $_session->get('userID');
-	// Fetch all group where this user is part of
+	// Fetch all groups this user is part of
 	$_userGroups 		= pricesets_civicrm_fetch_user_groups($_userIdentifier);
-	// Check if the user is an admin
-	if(in_array("1", $_userGroups)) $_isAdmin = true;
+	// Save cheapest option to mark the cheapest option as default (-KL)
+	$_cheapestOption   = 1000000;
+
 	// Loop trough every price set
 	foreach ($amount as $_amountIndex => &$_priceSetSettings) {
-		foreach($_priceSetSettings['options'] as $_priceSetIndex => $_priceSet) {
+		foreach($_priceSetSettings['options'] as $_priceSetIndex => &$_priceSet) {
 			// Check for matching groups for the given priceSet
 			$_matchingGroups = pricesets_civicrm_fetchPriceFieldGroupCombination($_priceSet['id']);
 			// Check if we do have matching groups for the given price set field
@@ -170,12 +172,17 @@ function pricesets_civicrm_buildAmount($pageType, &$form, &$amount) {
 					// Check if the user is an administrator
 					if($_isAdmin) {
 						// Alter label of the given price set
-						$_priceSetSettings['options'][$_priceSetIndex]['label'] = $_priceSetSettings['options'][$_priceSetIndex]['label'] . " <i>(visible because of admin status)</i>";
+						$_priceSet['label'] = $_priceSet['label'] . " <i>(visible because of admin status)</i>";
 					} else {
 						// Remove price set from original array
 						unset($_priceSetSettings['options'][$_priceSetIndex]);
+						continue;
 					}
 				}
+			}
+
+			if($_priceSet['amount'] < $_cheapestOption) {
+				$_cheapestOption = $_priceSet['amount'];
 			}
 		}
 		// Check if we do have any remaining price-sets left
@@ -183,6 +190,12 @@ function pricesets_civicrm_buildAmount($pageType, &$form, &$amount) {
 			// We don't have any options left in the price-set, delete it
 			unset($amount[$_amountIndex]);
 		}
+
+		// Mark the cheapest option as default - we could of course hide / disable other options entirely
+		foreach($_priceSetSettings['options'] as $_priceSetIndex => &$_priceSet) {
+				$_priceSet['is_default'] = ($_priceSet['amount'] == $_cheapestOption) ? 1 : 0;
+		}
+		echo '</pre>';
 	}
 }
 
@@ -223,6 +236,11 @@ function pricesets_civicrm_fetchPriceFieldGroupCombination($priceFieldValueIdent
  * Returns an array with all the groups
  */
 function pricesets_civicrm_fetch_user_groups($userIdentifier) {
+
+	// If user identifier is null, return no groups (otherwise all groups will be returned -KL)
+	if($userIdentifier == null)
+		return array();
+
 	// Define return and temporarily arrays
 	$_userGroups 		= array();
 	$_regularGroups 	= array();
