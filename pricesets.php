@@ -286,18 +286,16 @@ function pricesets_civicrm_xmlMenu(&$files) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function pricesets_civicrm_install() {
-	/*CRM_Core_DAO::executeQuery("
-		CREATE TABLE IF NOT EXISTS `civicrm_group_pricefieldvalue` (
-		  `id` int(11) NOT NULL AUTO_INCREMENT,
-		  `civicrm_group_id` int(10) unsigned NOT NULL COMMENT 'group id',
-		  `civicrm_price_field_value_id` int(10) unsigned NOT NULL COMMENT 'price field value id',
-		  PRIMARY KEY (`id`),
-		  KEY `civicrm_group_id` (`civicrm_group_id`,`civicrm_price_field_value_id`),
-		  KEY `civicrm_price_field_value_id` (`civicrm_price_field_value_id`)
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-		ALTER TABLE `civicrm_group_pricefieldvalue` ADD FOREIGN KEY (`civicrm_group_id`) REFERENCES `canso_civicrm`.`civicrm_group`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT; 
-		ALTER TABLE `civicrm_group_pricefieldvalue` ADD FOREIGN KEY (`civicrm_price_field_value_id`) REFERENCES `canso_civicrm`.`civicrm_price_field_value`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
-	");*/
+	CRM_Core_DAO::executeQuery("CREATE TABLE IF NOT EXISTS `civicrm_group_pricefieldvalue` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`civicrm_group_id` int(10) unsigned NOT NULL COMMENT 'group id',
+		`civicrm_price_field_value_id` int(10) unsigned NOT NULL COMMENT 'price field value id',
+		PRIMARY KEY (`id`),
+		KEY `civicrm_group_id` (`civicrm_group_id`,`civicrm_price_field_value_id`),
+		KEY `civicrm_price_field_value_id` (`civicrm_price_field_value_id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+	CRM_Core_DAO::executeQuery("ALTER TABLE `civicrm_group_pricefieldvalue` ADD FOREIGN KEY (`civicrm_group_id`) REFERENCES `civicrm_group`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+		ADD FOREIGN KEY (`civicrm_price_field_value_id`) REFERENCES `civicrm_price_field_value`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT");
 	return _pricesets_civix_civicrm_install();
 }
 
