@@ -193,8 +193,21 @@ function pricesets_civicrm_buildAmount($pageType, &$form, &$amount) {
 		}
 		// Check if we do have any remaining price-sets left
 		if(!count($_priceSetSettings['options'])) {
+
 			// We don't have any options left in the price-set, delete it
 			unset($amount[$_amountIndex]);
+
+			// Quick hack to disable the option to register completely if there is no price available
+			// People should never see this page - the event shouldn't be shown in the views if they can't register
+			/** @var $form CRM_Event_Form_Registration_Register */
+			CRM_Core_Session::setStatus('You are not allowed to register for this event.');
+			$form->assign(array(
+				'event' => array(),
+				'priceSet' => array(),
+				'customPre' => array(),
+				'customPost' => array(),
+				'noCalcValueDisplay' => true,
+			));
 		}
 
 		// Mark the cheapest option as default - we could of course hide / disable other options entirely
