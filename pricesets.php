@@ -81,7 +81,7 @@ function pricesets_fetch_all_groups() {
 	$groups = array(0 => "-- no restriction --");
 	// Fetch all groups
 	$result = civicrm_api3("group","get",array("options" => array("sort" => "title", "limit" => 0)));
-	// Loop trough all groups and put them in return variable
+	// Loop through all groups and put them in return variable
 	foreach ($result['values'] as $group) {
 		$groups[$group['id']] = $group['title'];
 	}
@@ -99,13 +99,13 @@ function pricesets_civicrm_postProcess($formName, &$form) {
 	if ($formName == "CRM_Price_Form_Field") {
 		// Fetch parent price set
 		$_priceSet = civicrm_api3("PriceField", "getsingle", array("label" => $_POST['label'], "price_set_id" => $_POST['sid']));		
-		// Loop trough all the fields
+		// Loop through all the fields
 		foreach($_POST['option_group_restriction'] as $_index => $_groups) {
 			// Check if the label ain't empty
 			if(!empty($_POST['option_label'][$_index])) {
 				// Fetch the selected price field value identifier
 				$_priceFieldValue = civicrm_api3("PriceFieldValue", "getsingle", array("price_field_id" => $_priceSet['id'], "label" => $_POST['option_label'][$_index]));	
-				// Loop trough all the selected groups
+				// Loop through all the selected groups
 				foreach($_groups as $_group) {
 					// If the group doesn't equal zero, then register the group
 					if($_group != "0") pricesets_connect_group_pricefieldvalue($_group, $_priceFieldValue['id']);
@@ -166,7 +166,7 @@ function pricesets_civicrm_buildAmount($pageType, &$form, &$amount) {
 	// Save cheapest option to mark the cheapest option as default (-KL)
 	$_cheapestOption   = 1000000;
 
-	// Loop trough every price set
+	// Loop through every price set
 	foreach ($amount as $_amountIndex => &$_priceSetSettings) {
 		foreach($_priceSetSettings['options'] as $_priceSetIndex => &$_priceSet) {
 			// Check for matching groups for the given priceSet
@@ -231,7 +231,7 @@ function pricesets_civicrm_fetchPriceFieldGroupCombination($priceFieldValueIdent
 		$_matchingGroups = CRM_Core_DAO::executeQuery("SELECT `civicrm_group_id` FROM `civicrm_group_pricefieldvalue` WHERE `civicrm_price_field_value_id` = ".$priceFieldValueIdentifier);
 		// Check if we do have any matches
 		if($_matchingGroups) {
-			// Loop trough all the matches
+			// Loop through all the matches
 			while($_matchingGroups->fetch()) {
 				// Put the given match in the return array
 				$_matchingGroupsArray[] = $_matchingGroups->civicrm_group_id;
@@ -275,10 +275,10 @@ function pricesets_civicrm_fetch_user_groups($userIdentifier) {
 	$_fetchSmartGroups = civicrm_api3("Group","get", array("options" => array("sort" => "title", "limit" => 0)));
 	// Check if the groups aint empty
 	if(empty($_fetchSmartGroups['is_error']) && !empty($_fetchSmartGroups['values'])) {
-		// Loop trough all the results
+		// Loop through all the results
 		foreach($_fetchSmartGroups['values'] as $_smartGroup) {
 			// Check if current group is a smart group
-			if($_smartGroup['saved_search_id'] > 0) {
+			if(array_key_exists('saved_search_id', $_smartGroup) && $_smartGroup['saved_search_id'] > 0) {
 				// Attempt to fetch contact with smart group id and user identifier
 				$_attemptToFetchContact = civicrm_api3("Contact","get",array("contact_id" => $userIdentifier, "group" => $_smartGroup['id']));
 				// Check if we did find the contact
