@@ -200,7 +200,21 @@ function pricesets_civicrm_buildAmount($pageType, &$form, &$amount) {
 			// Quick hack to disable the option to register completely if there is no price available
 			// People should never see this page - the event shouldn't be shown in the views if they can't register
 			/** @var $form CRM_Event_Form_Registration_Register */
-			CRM_Core_Session::setStatus('You are not allowed to register for this event.');
+
+			// New version: set (Drupal, if possible) error message and redirect to event info page
+			$event = $form->get_template_vars('event');
+			if(!empty($event) && !empty($event['id'])) {
+
+				if (CRM_Core_Config::singleton()->userSystem->is_drupal) {
+					drupal_set_message('U hebt geen toegang tot de inschrijving voor dit evenement.', 'error');
+					CRM_Utils_System::redirect('/evenementen/info/' . $event['id']);
+				} else {
+					CRM_Core_Session::setStatus('Dit evenement is beperkt toegankelijk.', '', 'error');
+					CRM_Utils_System::redirect('/civicrm/event/info/' . $event['id']);
+				}
+			}
+
+			// Old code to empty form fields
 			$form->assign(array(
 				'event' => array(),
 				'priceSet' => array(),
